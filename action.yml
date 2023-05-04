@@ -1,0 +1,39 @@
+name: 'Get secret value from Azure Key Vault'
+description: 'Log into Azure and get secret values from the Key Vault'
+branding:
+  icon: unlock
+  color: green
+
+inputs:
+  azure_credentials:
+    type: string
+    description: 'Credentials JSON with subscription id, tenant id, client id and client secret'
+    required: false
+   
+  keyvault:
+    type: string
+    description: 'Name of the Key Vault'
+    required: true
+    
+  secrets:
+    type: string
+    description: 'Name of the secret'
+    required: true
+      
+  
+runs:
+  using: "composite"
+  steps:
+    - name: Login to Azure
+      if: ${{ inputs.azure_credentials }}
+      uses: azure/login@v1
+      with:
+        creds: ${{ inputs.azure_credentials }}
+
+    - name: Retrieve secrets from key Vault
+      shell: bash
+      run: |
+        chmod +x $GITHUB_ACTION_PATH/scripts/get-azure-secrets.sh
+        IFS=
+        file_secrets=$(cat ${{ inputs.secrets_file_path }})
+        $GITHUB_ACTION_PATH/scripts/get-azure-secrets.sh ${{ inputs.keyvault }} ${{ inputs.secrets }}
